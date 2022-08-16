@@ -1,3 +1,4 @@
+import os
 import time
 import requests
 
@@ -6,7 +7,7 @@ inventory_base_url = "https://api.locationinventory.info/inventory"
 shop_id = "test20170501.myshopify.com"
 product_handle = "x-pod-sling-pack"
 variant_id = 19284412006513
-country_code = "US"
+country_code = "US" if os.getenv("COUNTRY") is None else os.getenv("COUNTRY")
 discord_webhook_url = "discord_webhook"
 product_page_url = "https://www.codeofbell.com/products/x-pod-sling-pack"
 inventory_url = f"{inventory_base_url}?shop={shop_id}&handle={product_handle}"
@@ -32,7 +33,7 @@ while True:
                             # If in stock, send message to Discord
                             if notification_count >= notification_debounce:
                                 message = f"{quantity_available} units available in {country_code}!"
-                                #requests.post(discord_webhook_url, json={"content": f"{message}: {product_page_url}"})
+                                requests.post(discord_webhook_url, json={"content": f"{message}: {product_page_url}"})
                                 print(message)
                                 notification_count = 0
                             else:
@@ -44,5 +45,6 @@ while True:
                             print(message)
     except:
         print("There was an issue processing the request")
-        pass
+        requests.post(discord_webhook_url, json={"content": "Bot encountered an error. Please restart."})
+        break
     time.sleep(delay_time_minutes * 60)
